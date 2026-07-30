@@ -4,6 +4,8 @@ this is my **OpenRouter AI extension for PenguinMod, TurboWarp, and other projec
 
 Please read this whole **README.md**.
 
+also I just used GitHub Pages so URL downloading on TurboWarp works :)
+
 # About
 
 This extension connects to **[OpenRouter](https://openrouter.ai)**, an **AI API platform**. It uses the API key included in the string section.
@@ -30,3 +32,5 @@ I am *NOT* affiliated with OpenRouter, TurboWarp, PenguinMod, or any other organ
 
 Some OpenRouter models rarely work. I’ve only tested the free ones. Free [Google Gemma](https://deepmind.google/models/gemma/) models can not work sometimes. The default model in the string input [OpenAI GPT-OSS-20b](https://openai.com/ru-RU/index/introducing-gpt-oss/) free model (OpenRouter link [here](https://openrouter.ai/openai/gpt-oss-20b:free)) is working *most* of the time.
 for installing, use the URL. if the URL doesn’t work, download the raw file.
+
+documentation: [maxenoz.github.io/Maxenoz-s-AI-Extension/docs/](https://maxenoz.github.io/Maxenoz-s-AI-Extension/docs/)
