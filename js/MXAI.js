@@ -1,24 +1,35 @@
-// Maxenoz's AI Extension
-// Part 1: Core
+// Maxenoz's AI Extension v2
+// OpenRouter AI Extension for TurboWarp / PenguinMod
 
-(function(Scratch) {
+(function (Scratch) {
     "use strict";
 
     class MXAI {
+
         constructor() {
             this.lastMessage = "";
+
             this.memory = "";
-            this.permanentMemory = "";
-            this.model = "openai/gpt-oss-20b:free";
-            this.apiKey = "";
+
+            this.permanentMemory =
+                localStorage.getItem("mxai_memory") || "";
+
+            this.model =
+                "openai/gpt-oss-20b:free";
         }
+
 
         getInfo() {
             return {
                 id: "mxai",
-                name: "Maxenoz's AI Extension",
+                name: "Maxenoz's AI",
+
                 color1: "#6C63FF",
+                color2: "#5548CC",
+                color3: "#4438AA",
+
                 blocks: [
+
                     {
                         opcode: "askAI",
                         blockType: Scratch.BlockType.REPORTER,
@@ -35,6 +46,7 @@
                         }
                     },
 
+
                     {
                         opcode: "setModel",
                         blockType: Scratch.BlockType.COMMAND,
@@ -42,10 +54,12 @@
                         arguments: {
                             MODEL: {
                                 type: Scratch.ArgumentType.STRING,
-                                defaultValue: "openai/gpt-oss-20b:free"
+                                defaultValue:
+                                "openai/gpt-oss-20b:free"
                             }
                         }
                     },
+
 
                     {
                         opcode: "memorize",
@@ -54,10 +68,12 @@
                         arguments: {
                             TEXT: {
                                 type: Scratch.ArgumentType.STRING,
-                                defaultValue: "My name is..."
+                                defaultValue:
+                                "My name is..."
                             }
                         }
                     },
+
 
                     {
                         opcode: "setPermanentMemory",
@@ -66,10 +82,12 @@
                         arguments: {
                             TEXT: {
                                 type: Scratch.ArgumentType.STRING,
-                                defaultValue: "Important information"
+                                defaultValue:
+                                "Important information"
                             }
                         }
                     },
+
 
                     {
                         opcode: "clearMemory",
@@ -77,86 +95,174 @@
                         text: "clear memory"
                     },
 
+
                     {
                         opcode: "getMemory",
                         blockType: Scratch.BlockType.REPORTER,
                         text: "permanent memory"
                     },
 
+
                     {
-                        opcode: "lastMessage",
+                        opcode: "getLastMessage",
                         blockType: Scratch.BlockType.REPORTER,
                         text: "last AI message"
                     }
+
                 ]
             };
         }
 
-      async askAI(args) {
-    this.apiKey = args.KEY;
 
-    const response = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + this.apiKey
-            },
-            body: JSON.stringify({
-                model: this.model,
-                messages: [
+
+        async askAI(args) {
+
+            try {
+
+                const response = await fetch(
+                    "https://openrouter.ai/api/v1/chat/completions",
                     {
-                        role: "system",
-                        content: this.permanentMemory
-                    },
-                    {
-                        role: "user",
-                        content: args.TEXT
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "Authorization":
+                                "Bearer " + args.KEY
+                        },
+
+                        body: JSON.stringify({
+
+                            model: this.model,
+
+                            messages: [
+
+                                {
+                                    role: "system",
+
+                                    content:
+                                        "Permanent memory:\n" +
+                                        this.permanentMemory +
+
+                                        "\n\nTemporary memory:\n" +
+                                        this.memory
+                                },
+
+                                {
+                                    role: "user",
+
+                                    content: args.TEXT
+                                }
+
+                            ]
+
+                        })
                     }
-                ]
-            })
+                );
+
+
+                const data =
+                    await response.json();
+
+
+                if (data.error) {
+
+                    this.lastMessage =
+                        "API Error: " +
+                        data.error.message;
+
+                    return this.lastMessage;
+                }
+
+
+                this.lastMessage =
+                    data.choices[0]
+                    .message
+                    .content;
+
+
+                return this.lastMessage;
+
+
+            } catch (error) {
+
+                this.lastMessage =
+                    "Connection error: " +
+                    error.message;
+
+                return this.lastMessage;
+            }
         }
-    );
 
-    const data = await response.json();
 
-    this.lastMessage =
-        data.choices?.[0]?.message?.content ||
-        "AI error";
 
-    return this.lastMessage;
-}
+        setModel(args) {
 
-setModel(args) {
-    this.model = args.MODEL;
-}
+            this.model = args.MODEL;
 
-memorize(args) {
-    this.memory = args.TEXT;
-}
+        }
 
-setPermanentMemory(args) {
-    this.permanentMemory = args.TEXT;
-    localStorage.setItem("mxai_memory", this.permanentMemory);
-}
 
-clearMemory() {
-    this.memory = "";
-    this.permanentMemory = "";
-    localStorage.removeItem("mxai_memory");
-}
 
-getMemory() {
-    return this.permanentMemory;
-}
+        memorize(args) {
 
-lastMessage() {
-    return this.lastMessage;
-}
-      
+            this.memory +=
+                "\n" + args.TEXT;
+
+        }
+
+
+
+        setPermanentMemory(args) {
+
+            this.permanentMemory =
+                args.TEXT;
+
+
+            localStorage.setItem(
+                "mxai_memory",
+                this.permanentMemory
+            );
+
+        }
+
+
+
+        clearMemory() {
+
+            this.memory = "";
+
+            this.permanentMemory = "";
+
+            localStorage.removeItem(
+                "mxai_memory"
+            );
+
+        }
+
+
+
+        getMemory() {
+
+            return this.permanentMemory;
+
+        }
+
+
+
+        getLastMessage() {
+
+            return this.lastMessage;
+
+        }
+
     }
 
-    Scratch.extensions.register(new MXAI());
+
+    Scratch.extensions.register(
+        new MXAI()
+    );
+
 
 })(Scratch);
