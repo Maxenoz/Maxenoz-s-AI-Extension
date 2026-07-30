@@ -18,7 +18,9 @@ It can run unsandboxed **both in TurboWarp and PenguinMod.**
 
 **Step 1.** Ensure you have an **OpenRouter account** and an **OpenRouter API key.** If you don’t, click *[here](https://openrouter.ai/sign-in?redirect_url=https%3A%2F%2Fopenrouter.ai%2Fworkspaces%2Fdefault%2Fkeys)*.
 
-**Step 2.** Add the extension to your current **PenguinMod/TurboWarp editor session**.
+**Step 2.** Add the extension to your **PenguinMod/TurboWarp project** using the Custom Extension option and choose **URL.**
+
+**Step 2.5.** Set the URL to https://maxenoz.github.io/Maxenoz-s-AI-Extension/js/MXAI.js, *NOT* the raw GitHub URL (https://raw.githubusercontent.com/…)
 
 **Step 3.** Done! Now, paste your key into the blocks’ **key** string section or do it with a variable. and now you can chat with AIs!
 
