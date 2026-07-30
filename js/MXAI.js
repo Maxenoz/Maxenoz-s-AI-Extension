@@ -1,5 +1,5 @@
 // Maxenoz's AI Extension v2
-// OpenRouter AI Extension for TurboWarp / PenguinMod
+// TurboWarp / PenguinMod OpenRouter AI Extension
 
 (function (Scratch) {
     "use strict";
@@ -8,14 +8,17 @@
 
         constructor() {
             this.lastMessage = "";
-
             this.memory = "";
+            this.permanentMemory = "";
+            this.model = "openai/gpt-oss-20b:free";
 
-            this.permanentMemory =
-                localStorage.getItem("mxai_memory") || "";
-
-            this.model =
-                "openai/gpt-oss-20b:free";
+            // Safe memory loading
+            try {
+                this.permanentMemory =
+                    localStorage.getItem("mxai_memory") || "";
+            } catch (e) {
+                this.permanentMemory = "";
+            }
         }
 
 
@@ -46,7 +49,6 @@
                         }
                     },
 
-
                     {
                         opcode: "setModel",
                         blockType: Scratch.BlockType.COMMAND,
@@ -60,7 +62,6 @@
                         }
                     },
 
-
                     {
                         opcode: "memorize",
                         blockType: Scratch.BlockType.COMMAND,
@@ -68,12 +69,10 @@
                         arguments: {
                             TEXT: {
                                 type: Scratch.ArgumentType.STRING,
-                                defaultValue:
-                                "My name is..."
+                                defaultValue: "Remember this"
                             }
                         }
                     },
-
 
                     {
                         opcode: "setPermanentMemory",
@@ -82,12 +81,10 @@
                         arguments: {
                             TEXT: {
                                 type: Scratch.ArgumentType.STRING,
-                                defaultValue:
-                                "Important information"
+                                defaultValue: "Important"
                             }
                         }
                     },
-
 
                     {
                         opcode: "clearMemory",
@@ -95,13 +92,11 @@
                         text: "clear memory"
                     },
 
-
                     {
                         opcode: "getMemory",
                         blockType: Scratch.BlockType.REPORTER,
                         text: "permanent memory"
                     },
-
 
                     {
                         opcode: "getLastMessage",
@@ -114,22 +109,20 @@
         }
 
 
-
         async askAI(args) {
 
             try {
 
-                const response = await fetch(
+                const result = await fetch(
                     "https://openrouter.ai/api/v1/chat/completions",
                     {
                         method: "POST",
 
                         headers: {
-                            "Content-Type":
-                                "application/json",
+                            "Content-Type": "application/json",
 
                             "Authorization":
-                                "Bearer " + args.KEY
+                            "Bearer " + args.KEY
                         },
 
                         body: JSON.stringify({
@@ -140,18 +133,16 @@
 
                                 {
                                     role: "system",
-
                                     content:
-                                        "Permanent memory:\n" +
-                                        this.permanentMemory +
+                                    "Permanent memory:\n" +
+                                    this.permanentMemory +
 
-                                        "\n\nTemporary memory:\n" +
-                                        this.memory
+                                    "\n\nTemporary memory:\n" +
+                                    this.memory
                                 },
 
                                 {
                                     role: "user",
-
                                     content: args.TEXT
                                 }
 
@@ -162,12 +153,10 @@
                 );
 
 
-                const data =
-                    await response.json();
+                const data = await result.json();
 
 
                 if (data.error) {
-
                     this.lastMessage =
                         "API Error: " +
                         data.error.message;
@@ -188,8 +177,7 @@
             } catch (error) {
 
                 this.lastMessage =
-                    "Connection error: " +
-                    error.message;
+                    "Error: " + error.message;
 
                 return this.lastMessage;
             }
@@ -198,32 +186,27 @@
 
 
         setModel(args) {
-
             this.model = args.MODEL;
-
         }
 
 
 
         memorize(args) {
-
-            this.memory +=
-                "\n" + args.TEXT;
-
+            this.memory += "\n" + args.TEXT;
         }
 
 
 
         setPermanentMemory(args) {
 
-            this.permanentMemory =
-                args.TEXT;
+            this.permanentMemory = args.TEXT;
 
-
-            localStorage.setItem(
-                "mxai_memory",
-                this.permanentMemory
-            );
+            try {
+                localStorage.setItem(
+                    "mxai_memory",
+                    this.permanentMemory
+                );
+            } catch (e) {}
 
         }
 
@@ -232,29 +215,26 @@
         clearMemory() {
 
             this.memory = "";
-
             this.permanentMemory = "";
 
-            localStorage.removeItem(
-                "mxai_memory"
-            );
+            try {
+                localStorage.removeItem(
+                    "mxai_memory"
+                );
+            } catch (e) {}
 
         }
 
 
 
         getMemory() {
-
             return this.permanentMemory;
-
         }
 
 
 
         getLastMessage() {
-
             return this.lastMessage;
-
         }
 
     }
